@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+
+  LambdaExecutionRolenew:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:*
+            - ssm:*
+            - logs:*
+            Resource: 
+            - arn:aws:ssm:*
+            - arn:aws:s3:::*
+            - arn:aws:logs:*
+  Cloudformation:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lamdafunction to fetch  secrets from S3 bucket
+      Handler: script/index.lambda_handler
+      MemorySize: 1024
+      Role: !GetAtt LambdaExecutionRolenew.Arn
+      Runtime: python3.7
+      Timeout: 60
+      Code:
+          S3Bucket: cloudformation-lambda-parameter
+          S3Key: script.zip
+          
+       
